@@ -1,0 +1,166 @@
+struts2中使用数组
+在struts2中使用数组有两种方式：
+方式一：
+<s:form action="">
+	<s:textfield name="userName" />
+	<s:textfield name="userName" />
+	<s:textfield name="userName" />
+</s:form>
+对应的Action为：
+public TestAction extends ActionSupport{
+	public String execute(){
+		return "success";
+	}
+	private String[] userName;
+	
+	public void setUserName(String[] userName){
+		this.userName = userName;
+	}
+	public String[] getUserName(){
+		return userName;
+	}
+}
+其中userName不必初始化。
+
+在其他页面中使用该数组的值：
+userName1 : <s:property value="userName[0]" />
+userName2 : <s:property value="userName[1]" />
+userName3 : <s:property value="userName[2]" />
+这里跟java中使用数组差不多
+
+方式二：
+<s:form action="">
+	<s:textfield name="userName[0]" />
+	<s:textfield name="userName[1]" />
+	<s:textfield name="userName[2]" />
+</s:form>
+其中对应的Action为：
+public TestAction extends ActionSupport{
+	public String execute(){
+		return "success";
+	}
+	private String[] userName = new String[10];
+	
+	public void setUserName(String[] userName){
+		this.userName = userName;
+	}
+	public String[] getUserName(){
+		return userName;
+	}
+}
+这里要注意，对应的数组需要初始化，否则会抛出异常。
+
+
+struts2中使用List
+其中jsp页面也跟使用数组的两种方式一致：
+方式一：
+<s:form action="">
+	<s:textfield name="userName" />
+	<s:textfield name="userName" />
+	<s:textfield name="userName" />
+</s:form>
+
+方式二：
+<s:form action="">
+	<s:textfield name="userName[0]" />
+	<s:textfield name="userName[1]" />
+	<s:textfield name="userName[2]" />
+</s:form>
+
+在Action中：
+public TestAction ActionSupport{
+	public String execute(){
+		return "success";
+	}
+	private List userName;
+	
+	public setUserName(List userName){
+		this.userName = userName;
+	}
+	public getUserName(){
+		return this.userName;
+	}
+}
+在这里List不用初始化。
+当然也可以给List加上相应的泛型，比如：
+List<Integer> ages;
+List<User> users; 等。
+如果没有则默认为String类型。
+
+假设我们有一个User.java类：
+public User{
+	private String name;
+	public void setName(String name){
+		this.name = name;
+	}
+	public String getName(){
+		return name;
+	}
+}
+
+在Action类中我们有这样的定义：
+private List<User> users;
+public void setUsers(List<User> users){
+	this.users = users;
+}
+public List<User> getUsers(){
+	return users;
+}
+
+则我们在jsp页面中可以这样使用：
+<s:form acion="">
+	<s:textfield name="users[0].name" />
+	<s:textfield name="users[1].name" />
+	<s:textfield name="users[2].name" />
+</s:form>
+当然，这里也已加下角标也可以不加，即直接使用：users.name,效果一致。
+
+
+struts2中使用Map
+Action类：
+public class Test extends ActionSupport{
+	private Map<String,String> map;
+	public void setMap(Map<String,String> map){
+		this.map = map;
+	}
+	public Map<String,String> getMap(){
+		return map;
+	}
+}
+这里我们也不用对Map进行初始化，stturs2框架会帮我们自行创建。
+
+在jsp页面我们有两种方式使用Map:
+方式一：
+<s:form action="">
+	<s:textfield name="map.zhangsan" />
+	<s:textfield name="map.lisi" />
+	<s:textfield name="map.wangwu" />
+</s:form>
+其中map.的后面为map的key,自己输入的数据为map的value.
+
+方式二：
+<s:form action="">
+	<s:textfield name="map['zhangsan']" />
+	<s:textfield name="map['lisi']" />
+	<s:textfield name="map['wangwu']" />
+</s:form>
+其中map[]中单引号中的为map的key,输入的数据为map的value.
+
+在调用页面我们可以这样调用：
+<s:property value="map.lisi" />
+或者：
+<s:property value="map['lisi'] />
+这两种调用方式均能获取到map中key为lisi对应的value。
+
+当然map也可以使用其他类型作为key值或value值，比如：
+Map<String,User> userMap;等。
+
+注：这里我是用的是struts-2.5.16,
+
+
+
+
+
+
+
+
