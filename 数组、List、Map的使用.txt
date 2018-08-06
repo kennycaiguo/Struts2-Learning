@@ -157,7 +157,6 @@ Map<String,User> userMap;等。
 
 注：这里我是用的是struts-2.5.16,
 
-//新加入的
 
 
 
