@@ -1,0 +1,280 @@
+
+一 数据标签
+
+1. property标签
+
+property标签用来显示属性的值
+所包含的属性：
+
+------------------------------------------------------------------------------
+属性	是否必须	默认值				类型	描述
+value	否			ValueStack最顶端	Object	被显示的值
+default 否			null				String	值为空时用于显示的默认值
+escape	否			ture				Boolean	是否转义HTML
+------------------------------------------------------------------------------
+
+使用示例:
+<s:property value="user.username" />
+如果不指明value,即：<s:property /> 则值默认值为VlueStack栈顶的值。
+
+2. set标签
+
+set标签用于给一个属性取别名
+
+---------------------------------------------------------------------------------------------
+属性	是否必须	类型		描述
+name	是			String		被设置在指定作用于的变量的引用名
+scope	否			String		application、session、request、page或者action,默认值为action
+value	否			Object		设置值得表达式，即name引用名的值
+---------------------------------------------------------------------------------------------
+
+使用示例
+<s:set name="username" value="user.username" />
+<s:property value="#username" />
+这里我们将user.username 的值赋给了新建的引用变量username,之后我们就可以直接使用这个变量来获得user.username的值了
+
+3. push标签
+与set标签不同的是，push标签把值放入ValueStack中，以便我们对属性的访问
+
+-------------------------------------------------
+属性	是否必须	类型	描述
+value	是			Object	放到ValueStack中的值
+-------------------------------------------------
+
+使用示例：
+假设我们有一个User.java类：
+public class User{
+	private String name;
+	private String password;
+	public void setName(String name){
+		this.name = name;
+	}
+	public String getName(){
+		return name;
+	}
+	public void setPassword(String password){
+		this.password = password;
+	}
+	public String getPassword(){
+		return password;
+	}
+}
+Action类：
+public class TestAction extends ActionSupport{
+	private User user;
+	public String execute (){
+		return "success";
+	}
+	public void setUser(User user){
+		this.user = user;
+	}
+	public User getUser(){
+		return user;
+	}
+}
+
+在jsp页面中我们可以这样调用User的属性：
+<s:property value="user.name" />
+<s:property value="user.password" />
+但是当User中的属性很多时，我们会发现每次都得使用user.的方式来调用，我们会觉得很烦，
+这里push标签就发挥作用了：
+<s:push value="user">
+	<s:peoperty value="name" />
+	<s:property value="password" />
+</s:push>
+这样使用的效果与上面的方式是一致的。
+这里需要注意的是，user对象是已经存在ValueStack中的了。
+
+4. bean标签
+
+bean标签像是set标签和push标签的混合。主要不同的是bean标签不需要使用一个已经存在的对象。
+你可以创建一个对象的实例把它放到ValueStack中或者设置为ActionContext的顶级引用。
+默认情况下，对象会被放在ValueStack中。如果想在标签的作用域之外引用创建的对象，
+可以使用var属性为对象创建一个引用名，那么这个引用名会作为命名参数存在于ActionContext中，
+在请求周期内可以使用#操作符访问这个对象。
+-----------------------------------------------------------------------------
+属性	是否必须	类型	描述
+name	是			String	被创建bean的包名和类名
+var		否			String	在结束标签作用域之外引用这个bean时使用的变量名
+-----------------------------------------------------------------------------
+
+使用示例：
+
+假设User.java在com.user包中，内容与上面的一致，
+则在jsp页面我们可以这样使用：
+
+<s:bean name="com.user.User" var="user">
+	<s:param name="name">张三</s:param>
+	<s:param name="password">123456</s:param>
+</s:bean>
+<s:property value="#user.id"/>
+<s:property value="#user.password"/>
+
+这里需要注意的是，user对象是放在ActionContext中的，所以我们需要使用#来访问它。
+
+5. action标签
+
+该标签允许我们从当前的视图调用其他的动作。
+----------------------------------------------------------------------------------
+属性			是否必须	类型	描述
+name			是			String	动作名
+namespace 		否			String	动作的命名空间，默认使用当前页面的命名空间
+var				否			String	在后续代码中使用的动作对象的引用名
+executeResult	否			Boolean	设为true时将动作的结果显示在当前页面，默认为false
+flush			否			Boolean	设为true时在action标签的结尾会刷新写出缓冲区，默认值为true
+ignoreContextParams 否		Boolean	设置为true时不包含请求参数，默认为false
+--------------------------------------------------------------------------------------
+
+使用示例：
+
+index.jsp:
+
+<s:action name="target" namespace="/tagsTest" executeResult="true" />
+
+在struts.xml中有如下配置：
+<package name="default" namespace="/tagsTest" extends="struts-default">
+	<action name="target" class="com.action.TestAction">
+		<result name="success">/success.jsp</result>
+	</action>
+</package>
+
+上面使用的结果会将success.jsp的页面在index.jsp中显示。
+
+
+二 控制标签
+
+1. iterator 标签
+
+iterator标签可以遍历Collection、Map、Enumeration、Iterator或者数组
+
+-----------------------------------------------------------------------------------
+属性	是否必须	类型	描述
+value 	是			String	被遍历的对象
+status	否			String	如果指定，IteratorStatus对象会使用这个属性指定的名字,
+							且该名字被放在ActionContext中
+-----------------------------------------------------------------------------------
+
+使用示例：
+
+<s:iterator value="users" status="s">
+	<s:property value="#s.count" />
+	<s:property value="name" />
+	<s:property value="password" />
+</s:iterator>
+
+其中users为要遍历的数字或其他的什么集合，集合类型为User,定义与上面定义的User.java一致。
+这里status属性定义的s放在ActionContext中，所以访问的时候需要加上#.
+额外说明：
+如果定义了status属性，那么会在ActionContext中提供一个IteratorStatus对象，这个对象可以提供诸如集合大小、
+当前索引等信息。可以通过status属性指定的名字来访问IteratorStatus对象。下面为IteratorStatus对象可以获得的信息：
+-------------------------------------------------------------------
+方法名					返回值
+getCount				int
+getIndex				int
+isEvent					Boolean
+isFirst					Boolean
+isLast					Boolean
+isOdd					Boolean
+modulus(int operand) 	int
+-------------------------------------------------------------------
+上面的实例中我们使用#s.count来获得了当前遍历的是集合中的第几个
+
+
+2. if和else标签
+
+----------------------------------------------------------------------
+属性	是否必须	类型		描述
+test	是			Boolean		被求值和测试的布尔表达式
+----------------------------------------------------------------------
+
+使用示例：
+
+<s:if test="user.age > 35">The user is too old.</s:if>
+<s:elseif test="user.age < 18">The user is too young</s:elseif>
+<s:else>This user is just right</else>
+
+
+三 其他标签
+
+1. include标签
+
+include标签与前面讲的action标签不同的是：
+include标签可以引用任何的Servlet资源，而action标签只能包含当前Struts 2应用程序中的Struts 2动作。
+这个包含的动作必须完全在Struts2框架中。include标签可以跳出Struts 2框架引用任何部署Struts 2应用
+程序的Web应用程序可以访问的资源。
+
+-----------------------------------------------------------------------------------------------
+属性		是否必须	类型		描述
+value 		是			String		页面、动作、Servlet以及其他可以被引用的URL的名字
+------------------------------------------------------------------------------------------------
+
+使用示例：
+<s:include value="success.jsp" />
+
+
+2. URL标签
+
+------------------------------------------------------------------------------------------------
+属性		是否必须	类型	描述
+value			否		String	该URL的值
+action			否		String	生成URL指向的动作名，是用声明性框架中配置的动作名（不需要.action扩展名）
+var				否		String	如果指定，这个URL不会被写出，而会存储在ActionContext留后面使用
+includeParams	否		String	从all、get、none中选择参数，默认值为get
+includeContent	否		Boolean	如果为true，那么生成的URL会使用应用程序的Context作为前缀，默认值为true
+encode			否		Boolean	如果用户浏览器不支持Cookie,会将Session ID追加在生成的URL中
+scheme			否		String	指定协议，默认使用当前的协议(HTTP或者HTTPS)
+--------------------------------------------------------------------------------------------------
+
+使用示例1：
+<s:url value="/helloworld/hello.action" />
+<a href='<s:url value="/helloworld/hello.action" />'>Click Me</a>
+
+以上会输出：
+/HelloWorld/helloworld/hello.action
+Click Me
+
+注：HelloWorld为项目的名称
+	Click Me 是超链接，连接到该url指定的路径
+
+使用示例2：
+<a:url action="hello" namespace="helloworld" var="myUrl" />
+<a:href='<s:property value="#myUrl" />'>Click Me</a>
+
+输出：
+Click Me
+
+注:Click Me 为超链接，点击该超链接与上面的结果一致
+
+
+
+
+参考资料：Struts 2 In Action 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

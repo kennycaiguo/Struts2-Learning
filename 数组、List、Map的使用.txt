@@ -1,4 +1,4 @@
-struts2中使用数组
+1. struts2中使用数组
 在struts2中使用数组有两种方式：
 方式一：
 <s:form action="">
@@ -51,7 +51,7 @@ public TestAction extends ActionSupport{
 这里要注意，对应的数组需要初始化，否则会抛出异常。
 
 
-struts2中使用List
+2. struts2中使用List
 其中jsp页面也跟使用数组的两种方式一致：
 方式一：
 <s:form action="">
@@ -116,7 +116,7 @@ public List<User> getUsers(){
 当然，这里也已加下角标也可以不加，即直接使用：users.name,效果一致。
 
 
-struts2中使用Map
+3. struts2中使用Map
 Action类：
 public class Test extends ActionSupport{
 	private Map<String,String> map;
@@ -155,7 +155,9 @@ public class Test extends ActionSupport{
 当然map也可以使用其他类型作为key值或value值，比如：
 Map<String,User> userMap;等。
 
-注：这里我是用的是struts-2.5.16,
+注：这里我是用的是struts-2.5.16
+
+参考资料：Struts 2 In Action
 
 
 
