@@ -88,7 +88,7 @@ List<User> users; 等。
 如果没有则默认为String类型。
 
 假设我们有一个User.java类：
-public User{
+public class User{
 	private String name;
 	public void setName(String name){
 		this.name = name;
@@ -127,7 +127,7 @@ public class Test extends ActionSupport{
 		return map;
 	}
 }
-这里我们也不用对Map进行初始化，stturs2框架会帮我们自行创建。
+这里我们也不用对Map进行初始化，struts2框架会帮我们自行创建。
 
 在jsp页面我们有两种方式使用Map:
 方式一：
